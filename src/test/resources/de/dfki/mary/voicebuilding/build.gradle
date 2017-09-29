@@ -1,0 +1,99 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "de.dfki.mary:marytts-client:5.2"
+        classpath "de.dfki.mary:marytts-lang-en:5.2"
+    }
+}
+
+plugins {
+    id 'groovy'
+    id 'de.dfki.mary.voicebuilding-legacy' version '5.2.0'
+    id 'de.dfki.mary.voicebuilding-festvox' version '5.2.0'
+    id 'de.dfki.mary.voicebuilding.marytts-audio'
+}
+
+group 'de.dfki.mary'
+//version '5.3-SNAPSHOT'
+
+voice {
+    name = 'cmu-awb-time'
+    language = 'en'
+    region = 'US'
+    gender = 'male'
+    type = 'unit selection'
+    description = 'A male Scottish English limited-domain unit selection voice, built from recordings provided by Carnegie Mellon University'
+    samplingRate = 16000
+}
+
+repositories {
+    ivy {
+        url 'https://dl.bintray.com/marytts/marytts'
+        layout 'pattern', {
+            artifact '[organisation]/[module]/[artifact].[ext]'
+        }
+    }
+    ivy {
+        url 'http://festvox.org/examples'
+        layout 'pattern', {
+            artifact '[module]_[classifier]/packed/[artifact].[ext]'
+        }
+    }
+}
+
+dependencies {
+    data group: 'org.festvox', name: 'cmu_time_awb', classifier: 'ldom', ext: 'tar.bz2'
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'org.codehaus.groovy:groovy-all:2.4.10'
+    }
+}
+
+text.srcFileName = 'time.data'
+
+legacyInit.dependsOn wav, text, lab
+
+
+task createTextFile {
+    ext.textDir = file("$buildDir/input/text")
+    outputs.dir textDir
+    doLast {
+        textDir.mkdirs()
+        def file = file("$textDir/test.txt")
+        file.createNewFile()
+        file.text = "This is a test."
+    }
+
+}
+
+task createXmlFile {
+    ext.xmlDir = file("$buildDir/input/rawmaryxml")
+    outputs.dir xmlDir
+    doLast {
+        xmlDir.mkdirs()
+        def file = file("$xmlDir/test.xml")
+        file.createNewFile()
+        file.text = """<?xml version="1.0" encoding="UTF-8" ?>
+<maryxml version="0.4"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://mary.dfki.de/2002/MaryXML"
+         xml:lang="en-US">
+This is a test. 
+</maryxml>"""
+    }
+
+}
+
+synthesizeAudioFromText {
+    dependsOn legacyInit, createTextFile
+
+}
+
+synthesizeAudioFromRawMaryxml {
+    dependsOn legacyInit, createXmlFile
+
+}
