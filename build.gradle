@@ -13,7 +13,7 @@ ext.pluginId = 'de.dfki.mary.voicebuilding.marytts-audio'
 
 gradlePlugin {
     plugins {
-        maryttsAudioPlugin{
+        maryttsAudioPlugin {
             id = pluginId
             implementationClass = 'de.dfki.mary.voicebuilding.MaryttsAudioPlugin'
         }
@@ -25,10 +25,8 @@ repositories {
 }
 
 dependencies {
-    runtime 'de.dfki.mary:marytts-voicebuilding:0.1', {
-        exclude module: 'groovy-all'
-    }
-    runtime 'de.dfki.mary:marytts-lang-en:5.2', {
+    compile localGroovy()
+    compile group: 'de.dfki.mary', name: 'marytts-runtime', version: '5.2', {
         exclude module: 'groovy-all'
     }
     testCompile 'org.testng:testng:6.9.6'
@@ -63,7 +61,7 @@ pluginBundle {
     tags = ['text-to-speech', 'marytts', 'audio']
 
     plugins {
-        pandocRevealPlugin {
+        maryttsAudioPlugin {
             id = pluginId
             displayName = 'Gradle MaryTTS Audio Plugin'
         }
