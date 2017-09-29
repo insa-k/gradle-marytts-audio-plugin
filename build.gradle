@@ -1,0 +1,71 @@
+plugins {
+    id 'java-gradle-plugin'
+    id 'groovy'
+    id 'maven-publish'
+    id 'com.gradle.plugin-publish' version '0.9.7'
+}
+
+group 'de.dfki.mary'
+version '0.1.0-SNAPSHOT'
+description 'Synthesizing MaryTTS Audio'
+
+ext.pluginId = 'de.dfki.mary.voicebuilding.marytts-audio'
+
+gradlePlugin {
+    plugins {
+        maryttsAudioPlugin{
+            id = pluginId
+            implementationClass = 'de.dfki.mary.voicebuilding.MaryttsAudioPlugin'
+        }
+    }
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    runtime 'de.dfki.mary:marytts-voicebuilding:0.1', {
+        exclude module: 'groovy-all'
+    }
+    runtime 'de.dfki.mary:marytts-lang-en:5.2', {
+        exclude module: 'groovy-all'
+    }
+    testCompile 'org.testng:testng:6.9.6'
+}
+
+test {
+    useTestNG()
+    testLogging {
+        exceptionFormat = 'full'
+    }
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourceJar {
+                classifier 'sources'
+            }
+        }
+    }
+}
+
+pluginBundle {
+    website = 'http://mary.dfki.de'
+    vcsUrl = 'https://github.com/insa-k/gradle-marytts-audio-plugin'
+    description = project.description
+    tags = ['text-to-speech', 'marytts', 'audio']
+
+    plugins {
+        pandocRevealPlugin {
+            id = pluginId
+            displayName = 'Gradle MaryTTS Audio Plugin'
+        }
+    }
+}
